@@ -1,0 +1,76 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+  background-color: #fff;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden; /* Ensure no horizontal overflow */
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0; /* Remove any margins */
+  padding: 0; /* Remove any padding */
+  width: 100%;
+}
+
+/* Ensure all route components take up full width */
+.main-content > div {
+  width: 100%;
+}
+
+/* Custom scroll behavior for smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Remove any potential gaps between elements */
+.navbar, .contact-container {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+/* Apply styles to elements to enforce full width and prevent overflow */
+.about-container, .contact-container, .navbar, .home-container {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix for Safari and older browsers */
+#root {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .app, .main-content {
+    width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
+/* Fix for potential iframe or embedded content issues */
+iframe, video, img {
+  max-width: 100%;
+}
