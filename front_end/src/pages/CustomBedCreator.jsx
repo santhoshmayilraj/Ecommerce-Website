@@ -5,21 +5,160 @@ import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import './CustomBedCreator.css';
 
+<<<<<<< Updated upstream
 // Simple 3D Loading Component (for inside Canvas)
+=======
+// Enhanced Realistic Mattress 3D Model with Blue Theme
+function EnhancedMattressModel({ dimensions }) {
+  const { length, breadth, height } = dimensions;
+  
+  // Convert inches to 3D scale for better visualization
+  const scaleLength = length / 12;
+  const scaleBreadth = breadth / 12;
+  const scaleHeight = height / 6;
+
+  return (
+    <group rotation={[0, Math.PI / 8, 0]} position={[0, 0, 0]}>
+      {/* Main Mattress Body - Premium Blue */}
+      <mesh position={[0, 0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[scaleLength, scaleHeight, scaleBreadth]} />
+        <meshPhysicalMaterial 
+          color="#E6F3FF"
+          roughness={0.8}
+          metalness={0.0}
+          clearcoat={0.3}
+          clearcoatRoughness={0.7}
+        />
+      </mesh>
+
+      {/* Top Quilted Layer - Light Blue */}
+      <mesh position={[0, scaleHeight * 0.45, 0]} castShadow>
+        <boxGeometry args={[scaleLength * 0.99, scaleHeight * 0.18, scaleBreadth * 0.99]} />
+        <meshPhysicalMaterial 
+          color="#B3D9FF"
+          roughness={0.6}
+          metalness={0.0}
+          transmission={0.1}
+          opacity={0.95}
+          transparent
+        />
+      </mesh>
+
+      {/* Side Panels - Soft Blue Gray */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[scaleLength * 1.01, scaleHeight * 1.02, scaleBreadth * 1.01]} />
+        <meshStandardMaterial 
+          color="#D1E7FF"
+          roughness={0.5}
+          metalness={0.0}
+          wireframe={false}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+
+      {/* Realistic Quilted Diamond Pattern - Darker Blue */}
+      {Array.from({ length: Math.floor(scaleLength * 2) }, (_, i) => 
+        Array.from({ length: Math.floor(scaleBreadth * 2) }, (_, j) => {
+          const x = (i - Math.floor(scaleLength)) * 0.7;
+          const z = (j - Math.floor(scaleBreadth)) * 0.7;
+          return (
+            <mesh 
+              key={`quilt-${i}-${j}`} 
+              position={[x, scaleHeight * 0.52, z]}
+            >
+              <cylinderGeometry args={[0.03, 0.03, 0.02, 8]} />
+              <meshStandardMaterial 
+                color="#87CEEB"
+                roughness={0.3}
+                metalness={0.1}
+              />
+            </mesh>
+          );
+        })
+      ).flat()}
+
+      {/* Corner Reinforcements - Steel Blue */}
+      {[
+        [-scaleLength * 0.48, -scaleHeight * 0.3, -scaleBreadth * 0.48],
+        [scaleLength * 0.48, -scaleHeight * 0.3, -scaleBreadth * 0.48],
+        [-scaleLength * 0.48, -scaleHeight * 0.3, scaleBreadth * 0.48],
+        [scaleLength * 0.48, -scaleHeight * 0.3, scaleBreadth * 0.48]
+      ].map((position, i) => (
+        <mesh key={`corner-${i}`} position={position}>
+          <cylinderGeometry args={[0.05, 0.05, scaleHeight * 0.6, 8]} />
+          <meshStandardMaterial 
+            color="#4682B4"
+            roughness={0.4}
+            metalness={0.2}
+          />
+        </mesh>
+      ))}
+
+      {/* Premium Border Piping - Navy Blue */}
+      {[
+        [0, scaleHeight * 0.5, scaleBreadth * 0.5],
+        [0, scaleHeight * 0.5, -scaleBreadth * 0.5],
+        [scaleLength * 0.5, scaleHeight * 0.5, 0],
+        [-scaleLength * 0.5, scaleHeight * 0.5, 0]
+      ].map((position, i) => (
+        <mesh key={`piping-${i}`} position={position}>
+          <cylinderGeometry args={[0.02, 0.02, i < 2 ? scaleLength : scaleBreadth, 8]} />
+          <meshStandardMaterial 
+            color="#191970"
+            roughness={0.3}
+            metalness={0.3}
+          />
+        </mesh>
+      ))}
+
+      {/* Brand Label - White */}
+      <mesh position={[scaleLength * 0.3, scaleHeight * 0.53, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.8, 0.3]} />
+        <meshStandardMaterial 
+          color="#FFFFFF"
+          transparent
+          opacity={0.9}
+        />
+      </mesh>
+
+      {/* Memory Foam Base Layer - Light Blue Cream */}
+      <mesh position={[0, -scaleHeight * 0.25, 0]}>
+        <boxGeometry args={[scaleLength * 0.96, scaleHeight * 0.4, scaleBreadth * 0.96]} />
+        <meshStandardMaterial 
+          color="#F0F8FF"
+          roughness={0.9}
+          metalness={0.0}
+          transparent
+          opacity={0.7}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+// Loading Component
+>>>>>>> Stashed changes
 function Canvas3DLoader() {
   return (
     <Text
       position={[0, 0, 0]}
+<<<<<<< Updated upstream
       fontSize={0.5}
       color="#666"
+=======
+      fontSize={0.4}
+      color="#6366f1"
+>>>>>>> Stashed changes
       anchorX="center"
       anchorY="middle"
     >
-      Loading 3D Model...
+      Loading 3D Preview...
     </Text>
   );
 }
 
+<<<<<<< Updated upstream
 // Simplified 3D Mattress Component
 function MattressModel({ dimensions, design }) {
   const { length, breadth, height } = dimensions;
@@ -154,6 +293,18 @@ function LoadingSpinner() {
         <div></div>
       </div>
       <p>Loading 3D Mattress Model...</p>
+=======
+// Enhanced Loading Spinner
+function LoadingSpinner() {
+  return (
+    <div className="loading-overlay">
+      <div className="loading-spinner">
+        <div className="spinner-ring"></div>
+        <div className="spinner-ring"></div>
+        <div className="spinner-ring"></div>
+      </div>
+      <p className="loading-text">Crafting your perfect mattress...</p>
+>>>>>>> Stashed changes
     </div>
   );
 }
@@ -226,6 +377,7 @@ function CustomBedCreator() {
     }
   ];
 
+<<<<<<< Updated upstream
   const addToCart = () => {
     const customMattress = {
       id: `custom-mattress-${Date.now()}`,
@@ -259,6 +411,55 @@ function CustomBedCreator() {
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
+=======
+  const patterns = [
+    { id: 1, name: 'Classic Grid', description: 'Traditional quilted pattern', icon: '⬜' },
+    { id: 2, name: 'Diamond Elite', description: 'Elegant diamond stitching', icon: '💎' },
+    { id: 3, name: 'Wave Flow', description: 'Modern wave pattern', icon: '🌊' },
+    { id: 4, name: 'Minimal Clean', description: 'Simple, clean lines', icon: '➖' }
+  ];
+
+  const addToCart = () => {
+    try {
+      const customMattress = {
+        id: `custom-mattress-${Date.now()}`,
+        name: `Custom ${designs.find(d => d.id === selectedDesign)?.name} Mattress`,
+        category: 'custom-mattress',
+        price: calculatePrice(),
+        rating: 5.0,
+        image: '/api/placeholder/400/300',
+        description: `Custom mattress with ${designs.find(d => d.id === selectedDesign)?.name} design and ${patterns.find(p => p.id === selectedPattern)?.name} pattern`,
+        features: [
+          `Dimensions: ${dimensions.length}" × ${dimensions.breadth}" × ${dimensions.height}"`,
+          ...designs.find(d => d.id === selectedDesign)?.features || [],
+          '10-Year Warranty',
+          'Free Delivery'
+        ],
+        isCustom: true,
+        customSpecs: { 
+          dimensions: { ...dimensions }, 
+          design: selectedDesign,
+          pattern: selectedPattern
+        },
+        quantity: 1
+      };
+
+      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const updatedCart = [...existingCart, customMattress];
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      
+      alert(`✅ Custom mattress added to cart! Price: ₹${calculatePrice().toLocaleString()}`);
+      navigate('/products');
+      
+    } catch (error) {
+      console.error('Error adding custom mattress to cart:', error);
+      alert('❌ Error adding mattress to cart. Please try again.');
+    }
+  };
+
+  const handleCanvasCreated = () => {
+    setTimeout(() => setIsLoading(false), 1200);
+>>>>>>> Stashed changes
   };
 
   return (
@@ -271,6 +472,7 @@ function CustomBedCreator() {
           Back to Products
         </button>
         <div className="header-content">
+<<<<<<< Updated upstream
           <h1>Custom Mattress Creator</h1>
           <p>Design your perfect mattress with advanced 3D preview technology</p>
           <div className="header-stats">
@@ -393,9 +595,131 @@ function CustomBedCreator() {
                 <div
                   key={design.id}
                   className={`design-card ${selectedDesign === design.id ? 'active' : ''}`}
+=======
+          <h1 className="header-title">Custom Mattress Designer</h1>
+          <p className="header-subtitle">Create your perfect sleep experience</p>
+        </div>
+      </header>
+
+      <div className="creator-main">
+        {/* Top Section - 3D Preview and Dimensions */}
+        <div className="preview-section">
+          <div className="canvas-wrapper">
+            <div className="canvas-header">
+              <h2>3D Preview</h2>
+              <span className="canvas-hint">Drag to rotate • Scroll to zoom</span>
+            </div>
+            
+            <div className="canvas-container">
+              {isLoading && <LoadingSpinner />}
+              
+              <Canvas 
+                camera={{ position: [6, 4, 6], fov: 50 }}
+                onCreated={handleCanvasCreated}
+                shadows
+                dpr={[1, 2]}
+                gl={{ antialias: true }}
+              >
+                <Suspense fallback={<Canvas3DLoader />}>
+                  <ambientLight intensity={0.6} />
+                  <directionalLight 
+                    position={[10, 10, 8]} 
+                    intensity={1.2} 
+                    castShadow 
+                    shadow-mapSize-width={2048}
+                    shadow-mapSize-height={2048}
+                  />
+                  <pointLight position={[-8, 6, -8]} intensity={0.4} color="#ffffff" />
+                  <spotLight position={[0, 8, 0]} intensity={0.3} angle={0.3} penumbra={1} />
+                  
+                  <EnhancedMattressModel dimensions={dimensions} />
+                  
+                  <OrbitControls 
+                    enablePan={true}
+                    enableZoom={true}
+                    enableRotate={true}
+                    minDistance={3}
+                    maxDistance={12}
+                    maxPolarAngle={Math.PI / 2.2}
+                    minPolarAngle={Math.PI / 8}
+                  />
+                  
+                  <Environment preset="studio" />
+                  
+                  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]} receiveShadow>
+                    <planeGeometry args={[25, 25]} />
+                    <meshStandardMaterial color="#f8fafc" roughness={0.8} />
+                  </mesh>
+                </Suspense>
+              </Canvas>
+            </div>
+          </div>
+
+          {/* Dimensions Panel */}
+          <div className="dimensions-panel">
+            <h3 className="panel-title">Dimensions</h3>
+            <div className="dimension-controls">
+              {['length', 'breadth', 'height'].map((dim) => {
+                const labels = { length: 'Length', breadth: 'Width', height: 'Height' };
+                const limits = {
+                  length: { min: 36, max: 96 },
+                  breadth: { min: 24, max: 84 },
+                  height: { min: 4, max: 16 }
+                };
+                
+                return (
+                  <div key={dim} className="dimension-item">
+                    <div className="dimension-header">
+                      <label className="dimension-label">{labels[dim]}</label>
+                      <span className="dimension-value">{dimensions[dim]}″</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={limits[dim].min}
+                      max={limits[dim].max}
+                      value={dimensions[dim]}
+                      onChange={(e) => handleDimensionChange(dim, e.target.value)}
+                      className="dimension-slider"
+                    />
+                    <div className="dimension-range">
+                      {limits[dim].min}″ - {limits[dim].max}″
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="mattress-specs">
+              <div className="spec-item">
+                <span className="spec-label">Surface Area</span>
+                <span className="spec-value">{(dimensions.length * dimensions.breadth / 144).toFixed(1)} sq ft</span>
+              </div>
+              <div className="spec-item">
+                <span className="spec-label">Volume</span>
+                <span className="spec-value">{(dimensions.length * dimensions.breadth * dimensions.height / 1728).toFixed(2)} cu ft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Section - Design Options */}
+        <div className="options-section">
+          {/* Mattress Types */}
+          <div className="option-category">
+            <h3 className="category-title">
+              <span className="title-icon">🛏️</span>
+              Mattress Type
+            </h3>
+            <div className="design-grid">
+              {designs.map(design => (
+                <div
+                  key={design.id}
+                  className={`design-card ${selectedDesign === design.id ? 'selected' : ''}`}
+>>>>>>> Stashed changes
                   onClick={() => setSelectedDesign(design.id)}
                 >
                   <div className="design-icon">{design.icon}</div>
+<<<<<<< Updated upstream
                   <div 
                     className="color-preview" 
                     style={{ backgroundColor: design.color }}
@@ -404,19 +728,51 @@ function CustomBedCreator() {
                     <h4 className="design-name">{design.name}</h4>
                     <p className="design-desc">{design.description}</p>
                     <ul className="design-features">
+=======
+                  <div className="design-content">
+                    <h4 className="design-name">{design.name}</h4>
+                    <p className="design-description">{design.description}</p>
+                    <div className="design-features">
+>>>>>>> Stashed changes
                       {design.features.map((feature, index) => (
-                        <li key={index}>{feature}</li>
+                        <span key={index} className="feature-tag">{feature}</span>
                       ))}
-                    </ul>
+                    </div>
                   </div>
+<<<<<<< Updated upstream
                   <div className="design-selector">
                     <div className="radio-button"></div>
+=======
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quilting Patterns */}
+          <div className="option-category">
+            <h3 className="category-title">
+              <span className="title-icon">✨</span>
+              Quilting Pattern
+            </h3>
+            <div className="pattern-grid">
+              {patterns.map(pattern => (
+                <div
+                  key={pattern.id}
+                  className={`pattern-card ${selectedPattern === pattern.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedPattern(pattern.id)}
+                >
+                  <div className="pattern-icon">{pattern.icon}</div>
+                  <div className="pattern-info">
+                    <h4 className="pattern-name">{pattern.name}</h4>
+                    <p className="pattern-description">{pattern.description}</p>
+>>>>>>> Stashed changes
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
+<<<<<<< Updated upstream
           <div className="panel-section price-display">
             <div className="price-header">
               <h3>Your Custom Mattress</h3>
@@ -570,6 +926,23 @@ function CustomBedCreator() {
               <strong>Warranty</strong>
               <span>10 Years Full Coverage</span>
             </div>
+=======
+          {/* Price and Action */}
+          <div className="purchase-section">
+            <div className="price-info">
+              <div className="price-breakdown">
+                <span className="price-label">Total Price</span>
+                <span className="price-value">₹{calculatePrice().toLocaleString()}</span>
+              </div>
+              <div className="price-details">
+                <span className="price-note">Includes 10-year warranty & free delivery</span>
+              </div>
+            </div>
+            <button className="add-to-cart-btn" onClick={addToCart}>
+              <span className="btn-icon">🛒</span>
+              Add to Cart - ₹{calculatePrice().toLocaleString()}
+            </button>
+>>>>>>> Stashed changes
           </div>
         </div>
       </div>
