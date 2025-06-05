@@ -1,4 +1,4 @@
-import React, { useState, Suspense, useMemo } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, Text } from '@react-three/drei';
 import { useNavigate } from 'react-router-dom';
@@ -23,8 +23,8 @@ function Canvas3DLoader() {
   );
 }
 
-// Simplified 3D Mattress Component
-function MattressModel({ dimensions, design }) {
+// Fixed 3D Mattress Component - WILL NOT CHANGE
+function MattressModel({ dimensions }) {
   const { length, breadth, height } = dimensions;
   
   // Convert inches to 3D scale (divide by 15 for better sizing)
@@ -32,20 +32,12 @@ function MattressModel({ dimensions, design }) {
   const scaleBreadth = breadth / 15;
   const scaleHeight = height / 15;
 
-  const mattressColors = useMemo(() => {
-    switch (design) {
-      case 1:
-        return { main: '#FFB6C1', accent: '#FF69B4', border: '#FF1493' }; // Pink
-      case 2:
-        return { main: '#87CEEB', accent: '#4169E1', border: '#0000CD' }; // Blue
-      case 3:
-        return { main: '#F0E68C', accent: '#DAA520', border: '#B8860B' }; // Gold
-      case 4:
-        return { main: '#F5F5F5', accent: '#D3D3D3', border: '#A9A9A9' }; // White/Gray
-      default:
-        return { main: '#F5F5DC', accent: '#DDD8C0', border: '#C0C0C0' }; // Beige
-    }
-  }, [design]);
+  // Fixed mattress colors - always white/cream regardless of selection
+  const mattressColors = {
+    main: '#FFFEF7',
+    accent: '#FFFFFF', 
+    border: '#2C2C2C'
+  };
 
   return (
     <group rotation={[0, Math.PI / 6, 0]} position={[0, 0, 0]}>
@@ -54,8 +46,8 @@ function MattressModel({ dimensions, design }) {
         <boxGeometry args={[scaleLength, scaleHeight, scaleBreadth]} />
         <meshStandardMaterial 
           color={mattressColors.main}
-          roughness={0.4}
-          metalness={0.1}
+          roughness={0.7}
+          metalness={0.0}
         />
       </mesh>
       
@@ -71,7 +63,7 @@ function MattressModel({ dimensions, design }) {
         />
       </mesh>
 
-      {/* Border/Piping */}
+      {/* Border/Piping - The 4 dark lines */}
       <mesh position={[0, scaleHeight * 0.45, 0]}>
         <boxGeometry args={[scaleLength * 1.02, scaleHeight * 0.1, scaleBreadth * 1.02]} />
         <meshStandardMaterial 
@@ -98,82 +90,124 @@ function MattressModel({ dimensions, design }) {
         </mesh>
       ))}
 
-      {/* Design-specific patterns */}
-      {design === 1 && (
-        // Floral pattern dots
-        Array.from({ length: 12 }, (_, i) => {
-          const x = (Math.random() - 0.5) * scaleLength * 0.8;
-          const z = (Math.random() - 0.5) * scaleBreadth * 0.8;
+      {/* Fixed quilted pattern - doesn't change */}
+      {Array.from({ length: Math.floor(scaleLength * 2) }, (_, i) => 
+        Array.from({ length: Math.floor(scaleBreadth * 2) }, (_, j) => {
+          const x = (i - Math.floor(scaleLength)) * 0.7;
+          const z = (j - Math.floor(scaleBreadth)) * 0.7;
           return (
-            <mesh key={`flower-${i}`} position={[x, scaleHeight * 0.51, z]}>
-              <sphereGeometry args={[0.05, 8, 8]} />
-              <meshStandardMaterial color="#FF1493" />
+            <mesh 
+              key={`quilt-${i}-${j}`} 
+              position={[x, scaleHeight * 0.51, z]}
+            >
+              <cylinderGeometry args={[0.03, 0.03, 0.02, 8]} />
+              <meshStandardMaterial 
+                color="#E0E0E0"
+                roughness={0.4}
+                metalness={0.0}
+              />
             </mesh>
           );
         })
-      )}
-
-      {design === 2 && (
-        // Geometric diamond pattern
-        Array.from({ length: 6 }, (_, i) => {
-          const x = ((i % 3) - 1) * scaleLength * 0.3;
-          const z = (Math.floor(i / 3) - 0.5) * scaleBreadth * 0.4;
-          return (
-            <mesh key={`diamond-${i}`} position={[x, scaleHeight * 0.51, z]} rotation={[0, Math.PI / 4, 0]}>
-              <boxGeometry args={[0.1, 0.02, 0.1]} />
-              <meshStandardMaterial color="#0000CD" />
-            </mesh>
-          );
-        })
-      )}
-
-      {design === 3 && (
-        // Luxury gold accents
-        Array.from({ length: 8 }, (_, i) => {
-          const angle = (i / 8) * Math.PI * 2;
-          const radius = Math.min(scaleLength, scaleBreadth) * 0.3;
-          const x = Math.cos(angle) * radius;
-          const z = Math.sin(angle) * radius;
-          return (
-            <mesh key={`luxury-${i}`} position={[x, scaleHeight * 0.51, z]}>
-              <sphereGeometry args={[0.03, 6, 6]} />
-              <meshStandardMaterial color="#FFD700" metalness={0.8} roughness={0.1} />
-            </mesh>
-          );
-        })
-      )}
+      ).flat()}
     </group>
   );
 }
 
-// HTML Loading Component
+// Enhanced Loading Component
 function LoadingSpinner() {
   return (
-    <div className="loading-spinner">
-      <div className="spinner-ring">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+    <div className="loading-overlay">
+      <div className="loading-content">
+        <div className="spinner-container">
+          <div className="spinner-ring"></div>
+          <div className="spinner-ring"></div>
+          <div className="spinner-ring"></div>
+        </div>
+        <h3 className="loading-title">Crafting Your Mattress</h3>
+        <p className="loading-subtitle">Creating the perfect sleep experience...</p>
       </div>
-      <p>Loading 3D Mattress Model...</p>
     </div>
   );
 }
 
-// Main Component
+// Size recommendation component
+function SizeRecommendations({ onSelectSize }) {
+  const sizePresets = [
+    { name: 'Twin', length: 75, breadth: 38, height: 8, icon: '🛏️', desc: 'Perfect for children' },
+    { name: 'Full', length: 75, breadth: 54, height: 8, icon: '🛌', desc: 'Ideal for single adults' },
+    { name: 'Queen', length: 80, breadth: 60, height: 10, icon: '👑', desc: 'Most popular choice' },
+    { name: 'King', length: 80, breadth: 76, height: 12, icon: '🏰', desc: 'Maximum comfort' }
+  ];
+
+  return (
+    <div className="size-recommendations">
+      <h4>Quick Size Selection</h4>
+      <div className="size-preset-grid">
+        {sizePresets.map((size, index) => (
+          <div 
+            key={index} 
+            className="size-preset-card"
+            onClick={() => onSelectSize(size)}
+          >
+            <span className="size-icon">{size.icon}</span>
+            <h5>{size.name}</h5>
+            <p className="size-dimensions">{size.length}" × {size.breadth}"</p>
+            <p className="size-desc">{size.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Live price calculator component
+function PriceBreakdown({ dimensions, selectedDesign, designs }) {
+  const volume = dimensions.length * dimensions.breadth * dimensions.height;
+  const basePrice = Math.round(volume * 0.08);
+  const designMultiplier = selectedDesign === 1 ? 1.2 : selectedDesign === 2 ? 1.4 : selectedDesign === 3 ? 1.8 : 1.1;
+  const designPremium = Math.round(basePrice * (designMultiplier - 1));
+  const totalPrice = Math.round(basePrice * designMultiplier);
+
+  return (
+    <div className="price-breakdown-detailed">
+      <div className="price-calculation">
+        <div className="calc-row">
+          <span>Volume ({dimensions.length}" × {dimensions.breadth}" × {dimensions.height}")</span>
+          <span>{volume.toLocaleString()} cu in</span>
+        </div>
+        <div className="calc-row">
+          <span>Base Price (₹0.08 per cu in)</span>
+          <span>₹{basePrice.toLocaleString()}</span>
+        </div>
+        <div className="calc-row">
+          <span>{designs.find(d => d.id === selectedDesign)?.name} Premium</span>
+          <span>₹{designPremium.toLocaleString()}</span>
+        </div>
+        <div className="calc-separator"></div>
+        <div className="calc-total">
+          <span>Total Amount</span>
+          <span>₹{totalPrice.toLocaleString()}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main Component with IMPROVED LAYOUT
 function CustomBedCreator() {
   const navigate = useNavigate();
   const [dimensions, setDimensions] = useState({
-    length: 75, // inches
-    breadth: 54, // inches
-    height: 8   // inches
+    length: 75,
+    breadth: 54,
+    height: 8
   });
   
   const [selectedDesign, setSelectedDesign] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('dimensions');
 
-  // Pricing calculation
+  // Pricing calculation - SAME LOGIC
   const calculatePrice = () => {
     const volume = dimensions.length * dimensions.breadth * dimensions.height;
     const basePrice = volume * 0.08;
@@ -192,6 +226,14 @@ function CustomBedCreator() {
       ...prev,
       [dimension]: Math.max(limits[dimension].min, Math.min(limits[dimension].max, parseInt(value) || 0))
     }));
+  };
+
+  const handleSizePresetSelect = (preset) => {
+    setDimensions({
+      length: preset.length,
+      breadth: preset.breadth,
+      height: preset.height
+    });
   };
 
   const designs = [
@@ -229,7 +271,7 @@ function CustomBedCreator() {
     }
   ];
 
-  // FIXED: Simple add to cart function
+  // SAME ADD TO CART LOGIC - UNCHANGED
   const addToCart = () => {
     try {
       const customMattress = {
@@ -255,19 +297,11 @@ function CustomBedCreator() {
         quantity: 1
       };
 
-      // Get existing cart
       const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      
-      // Add new custom mattress
       const updatedCart = [...existingCart, customMattress];
-      
-      // Save to localStorage
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       
-      // Show success message
       alert('Custom mattress added to cart successfully!');
-      
-      // Navigate back to products page
       navigate('/products');
       
     } catch (error) {
@@ -277,320 +311,379 @@ function CustomBedCreator() {
   };
 
   const handleCanvasCreated = () => {
-    // Add a small delay to ensure everything is loaded
     setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 1500);
   };
 
   return (
-    <div className="custom-mattress-creator">
-      <div className="creator-header">
-        <button className="back-button" onClick={() => navigate('/products')}>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          Back to Products
-        </button>
+    <div className="mattress-studio">
+      {/* IMMERSIVE HEADER */}
+      <header className="studio-header">
+        <div className="header-background">
+          <div className="header-pattern"></div>
+        </div>
         <div className="header-content">
-          <h1>Custom Mattress Creator</h1>
-          <p>Design your perfect mattress with advanced 3D preview technology</p>
-          <div className="header-stats">
-            <div className="stat-item">
-              <span className="stat-number">50K+</span>
-              <span className="stat-label">Happy Customers</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">100%</span>
-              <span className="stat-label">Premium Materials</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-number">10 Year</span>
-              <span className="stat-label">Warranty</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="creator-content">
-        <div className="controls-panel">
-          <div className="panel-section dimension-controls">
-            <div className="section-header">
-              <h3>Mattress Dimensions</h3>
-              <span className="section-subtitle">Customize to your exact needs</span>
-            </div>
-            
-            <div className="dimension-grid">
-              <div className="dimension-group">
-                <label htmlFor="length">
-                  <span className="dimension-icon">📏</span>
-                  Length: {dimensions.length}"
-                </label>
-                <div className="input-container">
-                  <input
-                    type="range"
-                    id="length"
-                    min="36"
-                    max="96"
-                    value={dimensions.length}
-                    onChange={(e) => handleDimensionChange('length', e.target.value)}
-                    className="dimension-slider"
-                  />
-                  <input
-                    type="number"
-                    value={dimensions.length}
-                    onChange={(e) => handleDimensionChange('length', e.target.value)}
-                    className="dimension-input"
-                    min="36"
-                    max="96"
-                  />
-                </div>
-                <div className="dimension-range">36" - 96"</div>
-              </div>
-
-              <div className="dimension-group">
-                <label htmlFor="breadth">
-                  <span className="dimension-icon">📐</span>
-                  Width: {dimensions.breadth}"
-                </label>
-                <div className="input-container">
-                  <input
-                    type="range"
-                    id="breadth"
-                    min="24"
-                    max="84"
-                    value={dimensions.breadth}
-                    onChange={(e) => handleDimensionChange('breadth', e.target.value)}
-                    className="dimension-slider"
-                  />
-                  <input
-                    type="number"
-                    value={dimensions.breadth}
-                    onChange={(e) => handleDimensionChange('breadth', e.target.value)}
-                    className="dimension-input"
-                    min="24"
-                    max="84"
-                  />
-                </div>
-                <div className="dimension-range">24" - 84"</div>
-              </div>
-
-              <div className="dimension-group">
-                <label htmlFor="height">
-                  <span className="dimension-icon">📊</span>
-                  Height: {dimensions.height}"
-                </label>
-                <div className="input-container">
-                  <input
-                    type="range"
-                    id="height"
-                    min="4"
-                    max="16"
-                    value={dimensions.height}
-                    onChange={(e) => handleDimensionChange('height', e.target.value)}
-                    className="dimension-slider"
-                  />
-                  <input
-                    type="number"
-                    value={dimensions.height}
-                    onChange={(e) => handleDimensionChange('height', e.target.value)}
-                    className="dimension-input"
-                    min="4"
-                    max="16"
-                  />
-                </div>
-                <div className="dimension-range">4" - 16"</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="panel-section design-selection">
-            <div className="section-header">
-              <h3>Mattress Color & Pattern</h3>
-              <span className="section-subtitle">Choose your style preference</span>
-            </div>
-            
-            <div className="design-options">
-              {designs.map(design => (
-                <div
-                  key={design.id}
-                  className={`design-card ${selectedDesign === design.id ? 'active' : ''}`}
-                  onClick={() => setSelectedDesign(design.id)}
-                >
-                  <div className="design-icon">{design.icon}</div>
-                  <div 
-                    className="color-preview" 
-                    style={{ backgroundColor: design.color }}
-                  ></div>
-                  <div className="design-info">
-                    <h4 className="design-name">{design.name}</h4>
-                    <p className="design-desc">{design.description}</p>
-                    <ul className="design-features">
-                      {design.features.map((feature, index) => (
-                        <li key={index}>{feature}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="design-selector">
-                    <div className="radio-button"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="panel-section price-display">
-            <div className="price-header">
-              <h3>Your Custom Mattress</h3>
-              <div className="price-amount">₹{calculatePrice().toLocaleString()}</div>
-            </div>
-            <div className="price-details">
-              <div className="price-breakdown">
-                <span>Base Price: ₹{Math.round(dimensions.length * dimensions.breadth * dimensions.height * 0.08).toLocaleString()}</span>
-                <span>Pattern Premium: {selectedDesign === 1 ? '20%' : selectedDesign === 2 ? '40%' : selectedDesign === 3 ? '80%' : '10%'}</span>
-              </div>
-              <p className="price-note">*Includes premium materials, craftsmanship, and 10-year warranty</p>
-              
-              <button className="add-to-cart-custom" onClick={addToCart}>
-                <span className="button-icon">🛒</span>
-                Add Custom Mattress to Cart
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="preview-panel">
-          <div className="panel-header">
-            <h3>3D Preview</h3>
-            <div className="preview-controls">
-              <span className="control-hint">🖱️ Drag to rotate • 🔍 Scroll to zoom</span>
-            </div>
-          </div>
+          <button className="back-button" onClick={() => navigate('/products')}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Store
+          </button>
           
-          <div className="canvas-container" style={{ position: 'relative', height: '400px', background: '#f8f9fa' }}>
-            {isLoading && (
-              <div style={{ 
-                position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                right: 0, 
-                bottom: 0, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                zIndex: 10,
-                background: '#f8f9fa'
-              }}>
-                <LoadingSpinner />
+          <div className="header-main">
+            <div className="studio-branding">
+              <div className="studio-icon">🛏️</div>
+              <h1>Dream Mattress Studio</h1>
+              <p>Design your perfect sleep sanctuary</p>
+            </div>
+            
+            <div className="live-price-display">
+              <div className="price-label">Your Custom Price</div>
+              <div className="price-amount">₹{calculatePrice().toLocaleString()}</div>
+              <div className="price-savings">Save 30% vs retail</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* MAIN WORKSPACE */}
+      <div className="studio-workspace">
+        {/* LEFT PANEL - 3D PREVIEW & STATS */}
+        <div className="preview-panel">
+          {/* 3D Canvas */}
+          <div className="canvas-section">
+            <div className="canvas-header">
+              <h3>Live 3D Preview</h3>
+              <div className="canvas-controls">
+                <span className="control-hint">🖱️ Drag to rotate</span>
+                <span className="control-hint">🔍 Scroll to zoom</span>
+              </div>
+            </div>
+            
+            <div className="canvas-container">
+              {isLoading && <LoadingSpinner />}
+              
+              <Canvas 
+                camera={{ position: [5, 3, 5], fov: 60 }}
+                onCreated={handleCanvasCreated}
+                style={{ 
+                  width: '100%', 
+                  height: '100%',
+                  opacity: isLoading ? 0 : 1,
+                  transition: 'opacity 0.8s ease-in-out'
+                }}
+              >
+                <Suspense fallback={null}>
+                  <ambientLight intensity={0.6} />
+                  <directionalLight 
+                    position={[10, 10, 5]} 
+                    intensity={1.2} 
+                    castShadow 
+                    shadow-mapSize-width={2048}
+                    shadow-mapSize-height={2048}
+                  />
+                  <pointLight position={[-10, -10, -5]} intensity={0.5} />
+                  
+                  <MattressModel dimensions={dimensions} />
+                  
+                  <OrbitControls 
+                    enablePan={true}
+                    enableZoom={true}
+                    enableRotate={true}
+                    minDistance={2}
+                    maxDistance={10}
+                    autoRotate={false}
+                    dampingFactor={0.05}
+                    enableDamping={true}
+                  />
+                  
+                  <Environment preset="studio" />
+                  
+                  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
+                    <planeGeometry args={[20, 20]} />
+                    <meshStandardMaterial 
+                      color="#f8fafc" 
+                      transparent 
+                      opacity={0.4}
+                      roughness={0.8}
+                    />
+                  </mesh>
+                </Suspense>
+              </Canvas>
+            </div>
+          </div>
+
+          {/* Stats & Specifications */}
+          <div className="preview-stats">
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-icon">📐</div>
+                <div className="stat-content">
+                  <h4>Dimensions</h4>
+                  <p>{dimensions.length}" × {dimensions.breadth}" × {dimensions.height}"</p>
+                </div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-icon">📊</div>
+                <div className="stat-content">
+                  <h4>Surface Area</h4>
+                  <p>{(dimensions.length * dimensions.breadth / 144).toFixed(1)} sq ft</p>
+                </div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-icon">🎨</div>
+                <div className="stat-content">
+                  <h4>Design</h4>
+                  <p>{designs.find(d => d.id === selectedDesign)?.name}</p>
+                </div>
+              </div>
+              
+              <div className="stat-card">
+                <div className="stat-icon">⚖️</div>
+                <div className="stat-content">
+                  <h4>Est. Weight</h4>
+                  <p>{Math.round(dimensions.length * dimensions.breadth * dimensions.height / 200)} lbs</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* CENTER PANEL - CONTROLS */}
+        <div className="controls-panel">
+          {/* Tab Navigation */}
+          <div className="control-tabs">
+            <button 
+              className={`tab-button ${activeTab === 'dimensions' ? 'active' : ''}`}
+              onClick={() => setActiveTab('dimensions')}
+            >
+              <span className="tab-icon">📏</span>
+              <span>Size</span>
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'design' ? 'active' : ''}`}
+              onClick={() => setActiveTab('design')}
+            >
+              <span className="tab-icon">🎨</span>
+              <span>Design</span>
+            </button>
+            <button 
+              className={`tab-button ${activeTab === 'materials' ? 'active' : ''}`}
+              onClick={() => setActiveTab('materials')}
+            >
+              <span className="tab-icon">🧵</span>
+              <span>Materials</span>
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="tab-content">
+            {activeTab === 'dimensions' && (
+              <div className="dimensions-tab">
+                <div className="tab-header">
+                  <h3>Perfect Size Selection</h3>
+                  <p>Customize every dimension to fit your space perfectly</p>
+                </div>
+
+                <SizeRecommendations onSelectSize={handleSizePresetSelect} />
+
+                <div className="custom-dimensions">
+                  <h4>Custom Dimensions</h4>
+                  <div className="dimension-controls">
+                    {['length', 'breadth', 'height'].map((dim) => {
+                      const labels = { length: 'Length', breadth: 'Width', height: 'Thickness' };
+                      const limits = {
+                        length: { min: 36, max: 96 },
+                        breadth: { min: 24, max: 84 },
+                        height: { min: 4, max: 16 }
+                      };
+                      
+                      return (
+                        <div key={dim} className="dimension-slider-group">
+                          <div className="slider-header">
+                            <label>{labels[dim]}</label>
+                            <span className="dimension-value">{dimensions[dim]}"</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={limits[dim].min}
+                            max={limits[dim].max}
+                            value={dimensions[dim]}
+                            onChange={(e) => handleDimensionChange(dim, e.target.value)}
+                            className="dimension-slider"
+                          />
+                          <div className="slider-range">
+                            <span>{limits[dim].min}"</span>
+                            <span>{limits[dim].max}"</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
-            <Canvas 
-              camera={{ position: [5, 3, 5], fov: 60 }}
-              onCreated={handleCanvasCreated}
-              style={{ 
-                width: '100%', 
-                height: '100%',
-                opacity: isLoading ? 0 : 1,
-                transition: 'opacity 0.5s ease-in-out'
-              }}
-            >
-              <Suspense fallback={null}>
-                <ambientLight intensity={0.6} />
-                <directionalLight 
-                  position={[10, 10, 5]} 
-                  intensity={1} 
-                  castShadow 
-                  shadow-mapSize-width={2048}
-                  shadow-mapSize-height={2048}
-                />
-                <pointLight position={[-10, -10, -5]} intensity={0.5} />
-                
-                <MattressModel 
-                  dimensions={dimensions} 
-                  design={selectedDesign}
-                />
-                
-                <OrbitControls 
-                  enablePan={true}
-                  enableZoom={true}
-                  enableRotate={true}
-                  minDistance={2}
-                  maxDistance={10}
-                  autoRotate={false}
-                  dampingFactor={0.05}
-                  enableDamping={true}
-                />
-                
-                <Environment preset="city" />
-                
-                {/* Floor */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
-                  <planeGeometry args={[20, 20]} />
-                  <meshStandardMaterial 
-                    color="#ffffff" 
-                    transparent 
-                    opacity={0.3}
-                    roughness={0.8}
-                  />
-                </mesh>
-              </Suspense>
-            </Canvas>
-          </div>
-          
-          <div className="preview-info">
-            <div className="dimension-display">
-              <div className="dimension-tag">
-                <span className="tag-label">L</span>
-                <span className="tag-value">{dimensions.length}"</span>
+
+            {activeTab === 'design' && (
+              <div className="design-tab">
+                <div className="tab-header">
+                  <h3>Style & Pattern</h3>
+                  <p>Choose from our premium design collection</p>
+                </div>
+
+                <div className="design-gallery">
+                  {designs.map(design => (
+                    <div
+                      key={design.id}
+                      className={`design-card ${selectedDesign === design.id ? 'selected' : ''}`}
+                      onClick={() => setSelectedDesign(design.id)}
+                    >
+                      <div className="design-preview">
+                        <div className="design-icon">{design.icon}</div>
+                        <div 
+                          className="design-color" 
+                          style={{ backgroundColor: design.color }}
+                        ></div>
+                      </div>
+                      <div className="design-info">
+                        <h4>{design.name}</h4>
+                        <p>{design.description}</p>
+                        <div className="design-features">
+                          {design.features.slice(0, 2).map((feature, index) => (
+                            <span key={index} className="feature-badge">{feature}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {selectedDesign === design.id && (
+                        <div className="selected-indicator">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <polyline points="20,6 9,17 4,12"></polyline>
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="dimension-tag">
-                <span className="tag-label">W</span>
-                <span className="tag-value">{dimensions.breadth}"</span>
+            )}
+
+            {activeTab === 'materials' && (
+              <div className="materials-tab">
+                <div className="tab-header">
+                  <h3>Premium Materials</h3>
+                  <p>Every mattress is crafted with the finest materials</p>
+                </div>
+
+                <div className="materials-showcase">
+                  <div className="material-card">
+                    <div className="material-icon">🌿</div>
+                    <h4>Organic Cotton Cover</h4>
+                    <p>Breathable, hypoallergenic, and naturally temperature regulating</p>
+                    <div className="material-features">
+                      <span>✓ GOTS Certified</span>
+                      <span>✓ Antimicrobial</span>
+                    </div>
+                  </div>
+
+                  <div className="material-card">
+                    <div className="material-icon">🧊</div>
+                    <h4>Memory Foam Core</h4>
+                    <p>Pressure-relieving foam that contours to your body shape</p>
+                    <div className="material-features">
+                      <span>✓ CertiPUR-US</span>
+                      <span>✓ Temperature Neutral</span>
+                    </div>
+                  </div>
+
+                  <div className="material-card">
+                    <div className="material-icon">🌬️</div>
+                    <h4>Ventilated Support</h4>
+                    <p>Advanced airflow channels for optimal temperature control</p>
+                    <div className="material-features">
+                      <span>✓ Enhanced Breathability</span>
+                      <span>✓ Moisture Wicking</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="dimension-tag">
-                <span className="tag-label">H</span>
-                <span className="tag-value">{dimensions.height}"</span>
-              </div>
-            </div>
-            <div className="mattress-info">
-              <span className="mattress-type">{designs.find(d => d.id === selectedDesign)?.name}</span>
-              <span className="mattress-size">
-                {(dimensions.length * dimensions.breadth / 144).toFixed(1)} sq ft
-              </span>
-            </div>
+            )}
           </div>
         </div>
-      </div>
 
-      <div className="specifications">
-        <h3>Detailed Specifications</h3>
-        <div className="spec-grid">
-          <div className="spec-item">
-            <div className="spec-icon">📦</div>
-            <div className="spec-content">
-              <strong>Volume</strong>
-              <span>{(dimensions.length * dimensions.breadth * dimensions.height / 1728).toFixed(2)} cubic feet</span>
+        {/* RIGHT PANEL - ORDER SUMMARY */}
+        <div className="summary-panel">
+          <div className="summary-card">
+            <div className="summary-header">
+              <h3>Your Custom Mattress</h3>
+              <div className="estimated-delivery">
+                <span className="delivery-icon">🚛</span>
+                <span>Ships in 2-3 weeks</span>
+              </div>
+            </div>
+
+            <PriceBreakdown 
+              dimensions={dimensions} 
+              selectedDesign={selectedDesign} 
+              designs={designs} 
+            />
+
+            <div className="summary-features">
+              <h4>What's Included</h4>
+              <div className="included-features">
+                <div className="feature-item">
+                  <span className="feature-check">✅</span>
+                  <span>10-Year Warranty</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-check">✅</span>
+                  <span>Free White Glove Delivery</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-check">✅</span>
+                  <span>100-Night Sleep Trial</span>
+                </div>
+                <div className="feature-item">
+                  <span className="feature-check">✅</span>
+                  <span>Eco-Friendly Materials</span>
+                </div>
+              </div>
+            </div>
+
+            <button className="add-to-cart-button" onClick={addToCart}>
+              <span className="button-icon">🛒</span>
+              <span className="button-text">Add to Cart</span>
+              <span className="button-price">₹{calculatePrice().toLocaleString()}</span>
+            </button>
+
+            <div className="trust-indicators">
+              <div className="trust-item">
+                <span className="trust-icon">🔒</span>
+                <span>Secure Checkout</span>
+              </div>
+              <div className="trust-item">
+                <span className="trust-icon">💳</span>
+                <span>Easy EMI Available</span>
+              </div>
             </div>
           </div>
-          <div className="spec-item">
-            <div className="spec-icon">🌿</div>
-            <div className="spec-content">
-              <strong>Material</strong>
-              <span>Premium Silk Cotton & Memory Foam</span>
-            </div>
-          </div>
-          <div className="spec-item">
-            <div className="spec-icon">🎨</div>
-            <div className="spec-content">
-              <strong>Pattern</strong>
-              <span>{designs.find(d => d.id === selectedDesign)?.name}</span>
-            </div>
-          </div>
-          <div className="spec-item">
-            <div className="spec-icon">🛡️</div>
-            <div className="spec-content">
-              <strong>Warranty</strong>
-              <span>10 Years Full Coverage</span>
+
+          <div className="help-section">
+            <div className="help-card">
+              <h4>Need Assistance?</h4>
+              <p>Our sleep experts are here to help you create the perfect mattress for your needs.</p>
+              <div className="help-actions">
+                <button className="help-button primary">
+                  <span>💬</span>
+                  Live Chat
+                </button>
+                <button className="help-button secondary">
+                  <span>📞</span>
+                  Call Us
+                </button>
+              </div>
             </div>
           </div>
         </div>
