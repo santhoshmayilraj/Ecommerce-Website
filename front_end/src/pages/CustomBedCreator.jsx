@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import './CustomBedCreator.css';
 
+// Import default image
+import doubleSizeBed from '../assets/images/mattress.jpg';
+
 // Simple 3D Loading Component (for inside Canvas)
 function Canvas3DLoader() {
   return (
@@ -226,32 +229,51 @@ function CustomBedCreator() {
     }
   ];
 
+  // FIXED: Simple add to cart function
   const addToCart = () => {
-    const customMattress = {
-      id: `custom-mattress-${Date.now()}`,
-      name: `Custom ${designs.find(d => d.id === selectedDesign)?.name} Mattress`,
-      category: 'custom-mattress',
-      price: calculatePrice(),
-      rating: 5.0,
-      image: '/api/placeholder/400/300',
-      description: `Custom ${designs.find(d => d.id === selectedDesign)?.name.toLowerCase()} mattress with dimensions ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
-      features: [
-        `Dimensions: ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
-        ...designs.find(d => d.id === selectedDesign)?.features || [],
-        'Premium silk cotton filling',
-        'Custom handcrafted mattress'
-      ],
-      isCustom: true,
-      customSpecs: { dimensions, design: selectedDesign }
-    };
+    try {
+      const customMattress = {
+        id: `custom-mattress-${Date.now()}`,
+        name: `Custom ${designs.find(d => d.id === selectedDesign)?.name} Mattress`,
+        category: 'custom-mattress',
+        price: calculatePrice(),
+        rating: 5.0,
+        image: doubleSizeBed,
+        description: `Custom ${designs.find(d => d.id === selectedDesign)?.name.toLowerCase()} mattress with dimensions ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
+        features: [
+          `Dimensions: ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
+          ...designs.find(d => d.id === selectedDesign)?.features || [],
+          'Premium silk cotton filling',
+          'Custom handcrafted mattress'
+        ],
+        isCustom: true,
+        customSpecs: { 
+          dimensions: { ...dimensions }, 
+          design: selectedDesign,
+          designName: designs.find(d => d.id === selectedDesign)?.name
+        },
+        quantity: 1
+      };
 
-    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const updatedCart = [...existingCart, { ...customMattress, quantity: 1 }];
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
-    
-    // Show success message
-    alert('Custom mattress added to cart successfully!');
-    navigate('/products');
+      // Get existing cart
+      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      
+      // Add new custom mattress
+      const updatedCart = [...existingCart, customMattress];
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      
+      // Show success message
+      alert('Custom mattress added to cart successfully!');
+      
+      // Navigate back to products page
+      navigate('/products');
+      
+    } catch (error) {
+      console.error('Error adding custom mattress to cart:', error);
+      alert('Error adding mattress to cart. Please try again.');
+    }
   };
 
   const handleCanvasCreated = () => {

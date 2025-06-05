@@ -111,6 +111,8 @@ function Products() {
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('featured');
   const [overlayVisible, setOverlayVisible] = useState(false);
+  const [notification, setNotification] = useState(null);
+  
   const navigate = useNavigate();
 
   // Product categories
@@ -121,23 +123,82 @@ function Products() {
     { id: 'raw', name: 'Raw Materials' }
   ];
 
-  // Load cart from localStorage
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (error) {
-        console.error("Error loading cart from localStorage:", error);
-        localStorage.removeItem('cart');
+  // FIXED: Load cart from localStorage and immediately sync state
+  const loadCartFromStorage = () => {
+    try {
+      const savedCart = localStorage.getItem('cart');
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart);
+        setCart(parsedCart);
+        return parsedCart;
       }
+      setCart([]);
+      return [];
+    } catch (error) {
+      console.error("Error loading cart from localStorage:", error);
+      localStorage.removeItem('cart');
+      setCart([]);
+      return [];
     }
+  };
+
+  // FIXED: Load cart ONLY on mount - no dependencies
+  useEffect(() => {
+    loadCartFromStorage();
   }, []);
 
-  // Save cart to localStorage whenever it changes
+  // FIXED: Save to localStorage only when cart is manually updated (not from polling)
+  const saveCartToStorage = (newCart) => {
+    localStorage.setItem('cart', JSON.stringify(newCart));
+  };
+
+  // FIXED: Simple polling without dependency on cart state
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+    let lastCartCheck = JSON.stringify(cart);
+    
+    const checkForCartChanges = () => {
+      try {
+        const currentCartString = localStorage.getItem('cart') || '[]';
+        
+        // Only update if localStorage is different from our last check
+        if (currentCartString !== lastCartCheck) {
+          const currentCart = JSON.parse(currentCartString);
+          
+          // Check for new custom items
+          const currentCustomItems = currentCart.filter(item => item.isCustom);
+          const previousCart = JSON.parse(lastCartCheck);
+          const previousCustomItems = previousCart.filter(item => item.isCustom);
+          
+          // Show notification for newly added custom items
+          if (currentCustomItems.length > previousCustomItems.length) {
+            const newCustomItem = currentCustomItems[currentCustomItems.length - 1];
+            setNotification({
+              message: `Custom mattress "${newCustomItem.name}" added to cart!`,
+              type: 'success'
+            });
+            
+            setTimeout(() => setNotification(null), 5000);
+            
+            // Show cart when custom item is added
+            setCartVisible(true);
+            setOverlayVisible(true);
+          }
+          
+          // Update cart state and tracking
+          setCart(currentCart);
+          lastCartCheck = currentCartString;
+        }
+      } catch (error) {
+        console.error('Error checking cart changes:', error);
+      }
+    };
+
+    // Check every 500ms for changes
+    const interval = setInterval(checkForCartChanges, 500);
+
+    // Cleanup
+    return () => clearInterval(interval);
+  }, []); // NO dependencies to avoid loops
 
   // Toggle cart visibility
   const toggleCart = () => {
@@ -145,17 +206,22 @@ function Products() {
     setOverlayVisible(!cartVisible);
   };
 
-  // Enhanced Add to Cart function with visual feedback
+  // FIXED: Add to cart with immediate localStorage save
   const addToCart = (product) => {
     const existingItem = cart.find(item => item.id === product.id);
     
+    let updatedCart;
     if (existingItem) {
-      setCart(cart.map(item => 
+      updatedCart = cart.map(item => 
         item.id === product.id ? {...item, quantity: item.quantity + 1} : item
-      ));
+      );
     } else {
-      setCart([...cart, {...product, quantity: 1}]);
+      updatedCart = [...cart, {...product, quantity: 1}];
     }
+    
+    // Update both state and localStorage immediately
+    setCart(updatedCart);
+    saveCartToStorage(updatedCart);
     
     // Show cart
     setCartVisible(true);
@@ -175,18 +241,22 @@ function Products() {
     }
   };
 
-  // Remove from cart
+  // FIXED: Remove from cart with immediate localStorage save
   const removeFromCart = (productId) => {
-    setCart(cart.filter(item => item.id !== productId));
+    const updatedCart = cart.filter(item => item.id !== productId);
+    setCart(updatedCart);
+    saveCartToStorage(updatedCart);
   };
 
-  // Update quantity
+  // FIXED: Update quantity with immediate localStorage save
   const updateQuantity = (productId, newQuantity) => {
     if (newQuantity < 1) return;
     
-    setCart(cart.map(item => 
+    const updatedCart = cart.map(item => 
       item.id === productId ? {...item, quantity: newQuantity} : item
-    ));
+    );
+    setCart(updatedCart);
+    saveCartToStorage(updatedCart);
   };
 
   // Calculate total
@@ -216,8 +286,102 @@ function Products() {
     setOverlayVisible(false);
   };
 
+  // Enhanced cart item renderer with custom item support
+  const renderCartItem = (item) => (
+    <div className="cart-item" key={item.id}>
+      <div className="cart-item-image">
+        <img 
+          src={item.image} 
+          alt={item.name}
+          onError={(e) => {
+            e.target.src = doubleSizeBed; // Fallback to a default image
+          }}
+        />
+        <div className="cart-item-quantity-badge">
+          x{item.quantity}
+        </div>
+      </div>
+      <div className="cart-item-details">
+        <div className="cart-item-header">
+          <h4>{item.name}</h4>
+          {item.isCustom && (
+            <span className="custom-item-badge">Custom</span>
+          )}
+          <span className="cart-item-quantity">
+            Qty: {item.quantity}
+          </span>
+        </div>
+        
+        {/* Show custom specifications for custom items */}
+        {item.isCustom && item.customSpecs && (
+          <div className="custom-specs">
+            <small style={{ 
+              color: '#666', 
+              fontSize: '0.85em', 
+              display: 'block',
+              marginBottom: '4px'
+            }}>
+              📏 Dimensions: {item.customSpecs.dimensions.length}" × {item.customSpecs.dimensions.breadth}" × {item.customSpecs.dimensions.height}"
+            </small>
+            <small style={{ 
+              color: '#666', 
+              fontSize: '0.85em', 
+              display: 'block' 
+            }}>
+              🎨 Design: {item.customSpecs.designName}
+            </small>
+          </div>
+        )}
+        
+        <div className="cart-item-price">
+          <span>₹{item.price.toLocaleString()}</span>
+          <span className="item-subtotal">
+            Subtotal: ₹{(item.price * item.quantity).toLocaleString()}
+          </span>
+        </div>
+        <div className="cart-item-controls">
+          <button 
+            className="quantity-btn"
+            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+            disabled={item.quantity <= 1}
+          >−</button>
+          <span className="quantity">{item.quantity}</span>
+          <button 
+            className="quantity-btn"
+            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+          >+</button>
+          <button 
+            className="remove-btn"
+            onClick={() => removeFromCart(item.id)}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="products-page">
+      {/* Notification */}
+      {notification && (
+        <div className={`notification ${notification.type}`}>
+          <div className="notification-content">
+            <span>{notification.message}</span>
+            <button 
+              className="notification-close"
+              onClick={() => setNotification(null)}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Overlay for cart */}
       <div 
         className={`cart-overlay ${overlayVisible ? 'visible' : ''}`} 
@@ -316,7 +480,7 @@ function Products() {
         ))}
       </div>
 
-      {/* Mini Cart */}
+      {/* Enhanced Mini Cart */}
       <div className={`mini-cart ${cartVisible ? 'visible' : ''}`}>
         <div className="cart-header">
           <h3>Your Cart ({cart.reduce((total, item) => total + item.quantity, 0) || 0} items)</h3>
@@ -333,53 +497,7 @@ function Products() {
         ) : (
           <>
             <div className="cart-items">
-              {cart.map(item => (
-                <div className="cart-item" key={item.id}>
-                  <div className="cart-item-image">
-                    <img src={item.image} alt={item.name} />
-                    {/* Add prominent quantity badge on the image */}
-                    <div className="cart-item-quantity-badge">
-                      x{item.quantity}
-                    </div>
-                  </div>
-                  <div className="cart-item-details">
-                    <div className="cart-item-header">
-                      <h4>{item.name}</h4>
-                      <span className="cart-item-quantity">
-                        Qty: {item.quantity}
-                      </span>
-                    </div>
-                    <div className="cart-item-price">
-                      <span>₹{item.price.toLocaleString()}</span>
-                      <span className="item-subtotal">
-                        Subtotal: ₹{(item.price * item.quantity).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="cart-item-controls">
-                      <button 
-                        className="quantity-btn"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                      >−</button>
-                      <span className="quantity">{item.quantity}</span>
-                      <button 
-                        className="quantity-btn"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      >+</button>
-                      <button 
-                        className="remove-btn"
-                        onClick={() => removeFromCart(item.id)}
-                      >
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                          <line x1="18" y1="6" x2="6" y2="18"></line>
-                          <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {cart.map(item => renderCartItem(item))}
             </div>
             <div className="cart-footer">
               <div className="cart-total">
@@ -387,7 +505,7 @@ function Products() {
                 <span className="total-price">₹{cartTotal.toLocaleString()}</span>
               </div>
               <button className="checkout-btn" onClick={() => navigate("/payment")}>
-              Proceed to Checkout
+                Proceed to Checkout
               </button>
               <button className="continue-shopping" onClick={toggleCart}>
                 Continue Shopping
