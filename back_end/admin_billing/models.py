@@ -1,44 +1,70 @@
-from mongoengine import Document, StringField, FloatField, IntField, ListField, DateTimeField, BooleanField, DictField
+import mongoengine as me
 from datetime import datetime
 
-class Order(Document):
-    # Order identification
-    order_number = StringField(max_length=50, required=True, unique=True)
+class Order(me.Document):
+    # Basic Order Info
+    order_number = me.StringField(required=True, unique=True, max_length=50)
     
-    # Customer details
-    customer_name = StringField(max_length=100, required=True)
-    customer_email = StringField(max_length=100, required=True)
-    customer_phone = StringField(max_length=15, required=True)
-    customer_address = StringField(required=True)
+    # Customer Information
+    customer_name = me.StringField(required=True, max_length=100)
+    customer_email = me.EmailField(required=True)
+    customer_phone = me.StringField(required=True, max_length=20)
+    customer_address = me.StringField(required=True)
     
-    # Product details
-    product_name = StringField(max_length=200, required=True)
-    product_category = StringField(max_length=100)
-    product_specifications = DictField()  # Size, color, etc.
-    quantity = IntField(required=True, default=1)
-    unit_price = FloatField(required=True)
+    # Order Items (Enhanced for multiple products)
+    order_items = me.ListField(me.DictField(), default=list)  # Array of items
     
-    # Pricing
-    subtotal = FloatField(required=True)  # quantity * unit_price
-    tax_amount = FloatField(default=0.0)  # 18% GST
-    total_amount = FloatField(required=True)  # subtotal + tax
+    # Legacy fields for backward compatibility
+    product_name = me.StringField(max_length=200)
+    product_category = me.StringField(max_length=50)
+    product_specifications = me.DictField(default=dict)
+    quantity = me.IntField(default=1)
+    unit_price = me.FloatField(default=0.0)
     
-    # Order status
-    status = StringField(max_length=50, default='pending')  # pending, confirmed, delivered, cancelled
-    payment_status = StringField(max_length=50, default='pending')  # pending, paid, failed
-    payment_method = StringField(max_length=50)  # card, upi, cod, netbanking
+    # Financial Information
+    subtotal = me.FloatField(required=True)
+    tax_amount = me.FloatField(default=0.0)
+    delivery_charges = me.FloatField(default=0.0)
+    cod_charges = me.FloatField(default=0.0)
+    total_amount = me.FloatField(required=True)
+    
+    # Payment Information (Updated to include 'completed')
+    payment_method = me.StringField(choices=['upi', 'card', 'netbanking', 'cod'], required=True)
+    payment_status = me.StringField(
+        choices=['pending', 'paid', 'completed', 'failed', 'refunded'], 
+        default='pending'
+    )
+    
+    # Delivery Information
+    delivery_option = me.StringField(choices=['standard', 'express'], default='standard')
+    expected_delivery_date = me.StringField(max_length=100)
+    delivery_notes = me.StringField(max_length=500)
+    
+    # Order Status
+    status = me.StringField(
+        choices=['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'],
+        default='pending'
+    )
     
     # Timestamps
-    created_at = DateTimeField(default=datetime.utcnow)
-    delivered_at = DateTimeField()
+    created_at = me.DateTimeField(default=datetime.utcnow)
+    updated_at = me.DateTimeField(default=datetime.utcnow)
+    delivered_at = me.DateTimeField()
     
-    # Notes
-    notes = StringField()
+    # Additional Info
+    notes = me.StringField(max_length=500)
     
     meta = {
         'collection': 'orders',
-        'indexes': ['order_number', 'customer_email', 'status', 'created_at']
+        'ordering': ['-created_at'],
+        'indexes': [
+            'order_number',
+            'customer_email',
+            'status',
+            'payment_method',
+            'created_at'
+        ]
     }
-
+    
     def __str__(self):
-        return f"{self.order_number} - {self.customer_name}"
+        return f"Order {self.order_number} - {self.customer_name}"

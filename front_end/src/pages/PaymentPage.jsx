@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './PaymentPage.css';
-import qrCodeImage from '../assets/images/qr-code-placeholder.jpg'; // Replace with your actual QR code
+import qrCodeImage from '../assets/images/qr-code-placeholder.jpg';
 
 function PaymentPage() {
   const navigate = useNavigate();
@@ -26,13 +26,15 @@ function PaymentPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
+  // API Configuration
+  const API_BASE_URL = 'http://localhost:8000/api/billing';
+
   // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart && savedCart !== '[]') {
       setCart(JSON.parse(savedCart));
     } else {
-      // Redirect to products if cart is empty
       navigate('/products');
     }
   }, [navigate]);
@@ -40,8 +42,9 @@ function PaymentPage() {
   // Calculate order totals
   const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   const deliveryCharges = deliveryOption === 'express' ? 299 : 149;
-  const tax = Math.round(subtotal * 0.18); // 18% tax
-  const total = subtotal + deliveryCharges + tax;
+  const tax = Math.round(subtotal * 0.18);
+  const codFee = paymentMethod === 'cod' ? 50 : 0;
+  const total = subtotal + deliveryCharges + tax + codFee;
 
   // Expected delivery date
   const getDeliveryDate = () => {
@@ -57,6 +60,116 @@ function PaymentPage() {
     });
   };
 
+  // Send order data to backend
+  const sendOrderToBackend = async (orderData) => {
+    try {
+      console.log('Sending order to backend:', orderData);
+      
+      const response = await fetch(`${API_BASE_URL}/orders/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Backend error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      console.log('Order successfully sent to backend:', result);
+      return result;
+      
+    } catch (error) {
+      console.error('Error sending order to backend:', error);
+      
+      // Don't block the UI flow, but log the error
+      // You might want to show a notification to the user
+      alert(`Order placed successfully, but there was an issue syncing with our system. Order ID: ${orderData.order_number}. Please contact support if needed.`);
+      
+      throw error;
+    }
+  };
+
+  // Process payment
+  const processPayment = async () => {
+    setIsProcessing(true);
+    
+    try {
+      // Generate order number
+      const generatedOrderNumber = 'OD' + Math.floor(100000000 + Math.random() * 900000000);
+      setOrderNumber(generatedOrderNumber);
+      
+      // Prepare order data for backend
+      const orderData = {
+        order_number: generatedOrderNumber,
+        customer_details: {
+          name: deliveryDetails.fullName,
+          email: deliveryDetails.email,
+          phone: deliveryDetails.phone,
+          address: {
+            street: deliveryDetails.address,
+            city: deliveryDetails.city,
+            state: deliveryDetails.state,
+            pincode: deliveryDetails.pincode,
+            delivery_notes: deliveryDetails.deliveryNotes || null
+          }
+        },
+        items: cart.map(item => ({
+          product_id: item.id,
+          product_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+          total_price: item.price * item.quantity,
+          is_custom: item.isCustom || false,
+          custom_specifications: item.customSpecs || null
+        })),
+        payment_details: {
+          method: paymentMethod,
+          status: paymentMethod === 'cod' ? 'pending' : 'completed',
+          subtotal: subtotal,
+          tax: tax,
+          delivery_charges: deliveryCharges,
+          cod_charges: codFee,
+          total_amount: total
+        },
+        delivery_details: {
+          option: deliveryOption,
+          expected_date: getDeliveryDate(),
+          charges: deliveryCharges
+        },
+        order_status: 'confirmed',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Simulate payment processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Send order to backend
+      await sendOrderToBackend(orderData);
+      
+      // Clear cart after successful payment and backend sync
+      localStorage.setItem('cart', '[]');
+      
+      setIsProcessing(false);
+      setStep(3);
+      window.scrollTo(0, 0);
+      
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      setIsProcessing(false);
+      
+      // Still proceed to confirmation if it's just a backend sync issue
+      // The order is placed locally, backend sync can be retried later
+      localStorage.setItem('cart', '[]');
+      setStep(3);
+      window.scrollTo(0, 0);
+    }
+  };
+
   // Handle delivery details form change
   const handleDeliveryDetailsChange = (e) => {
     const { name, value } = e.target;
@@ -65,7 +178,6 @@ function PaymentPage() {
       [name]: value
     }));
     
-    // Clear error when field is being typed in
     if (formErrors[name]) {
       setFormErrors(prevErrors => ({
         ...prevErrors,
@@ -143,25 +255,6 @@ function PaymentPage() {
     }
   };
 
-  // Process payment
-  const processPayment = () => {
-    setIsProcessing(true);
-    
-    // Simulate payment processing
-    setTimeout(() => {
-      // Generate random order number
-      const generatedOrderNumber = 'OD' + Math.floor(100000000 + Math.random() * 900000000);
-      setOrderNumber(generatedOrderNumber);
-      
-      // Clear cart after successful payment
-      localStorage.setItem('cart', '[]');
-      
-      setIsProcessing(false);
-      setStep(3); // Move to confirmation step
-      window.scrollTo(0, 0);
-    }, 2000);
-  };
-
   // Print invoice
   const printInvoice = () => {
     window.print();
@@ -173,6 +266,7 @@ function PaymentPage() {
         <div className="processing-overlay">
           <div className="processing-spinner"></div>
           <p>Processing your payment...</p>
+          <p className="processing-subtext">Please don't close this window</p>
         </div>
       )}
       
@@ -505,7 +599,7 @@ function PaymentPage() {
                 <button className="print-invoice-btn" onClick={printInvoice}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2 2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                     <rect x="6" y="14" width="12" height="8"></rect>
                   </svg>
                   Print Invoice
@@ -558,7 +652,7 @@ function PaymentPage() {
                     paymentMethod === 'netbanking' ? 'Net Banking' :
                     'Cash on Delivery'
                   }</p>
-                  <p><strong>Payment Status:</strong> Paid</p>
+                  <p><strong>Payment Status:</strong> {paymentMethod === 'cod' ? 'Pending' : 'Paid'}</p>
                   <p><strong>Expected Delivery:</strong> {getDeliveryDate()}</p>
                 </div>
               </div>
@@ -601,6 +695,12 @@ function PaymentPage() {
                   <span>Shipping ({deliveryOption === 'express' ? 'Express' : 'Standard'}):</span>
                   <span>₹{deliveryCharges}</span>
                 </div>
+                {codFee > 0 && (
+                  <div className="total-row">
+                    <span>COD Charges:</span>
+                    <span>₹{codFee}</span>
+                  </div>
+                )}
                 <div className="total-row grand-total">
                   <span>Grand Total:</span>
                   <span>₹{total.toLocaleString()}</span>
@@ -650,6 +750,12 @@ function PaymentPage() {
                 <span>Tax (18%):</span>
                 <span>₹{tax.toLocaleString()}</span>
               </div>
+              {codFee > 0 && (
+                <div className="price-row">
+                  <span>COD Charges:</span>
+                  <span>₹{codFee}</span>
+                </div>
+              )}
               <div className="price-row total">
                 <span>Total:</span>
                 <span>₹{total.toLocaleString()}</span>
