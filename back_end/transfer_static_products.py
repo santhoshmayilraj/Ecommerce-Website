@@ -4,10 +4,8 @@ import django
 import mongoengine
 from datetime import datetime
 
-# Add the project directory to Python path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 # Setup Django
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'back_end.settings')
 django.setup()
 
@@ -18,21 +16,22 @@ mongoengine.connect(
     host=settings.MONGODB_SETTINGS['host']
 )
 
-# Import models
 from shop_products.models import Product
 
-def transfer_frontend_products():
-    """Transfer static products from frontend to backend"""
+def transfer_exact_frontend_products():
+    """Transfer your exact frontend product data to backend"""
     
-    print("Transferring static products from frontend to backend...")
+    print("Transferring Exact Frontend Products to Backend")
     print("=" * 60)
     
-    # Your exact static product data from frontend
+    # Your exact frontend product data
     frontend_products = [
         {
             "name": "Double Size Bed",
-            "category": "Bed",
+            "category": "bed",
             "price": 15999.0,
+            "rating": 4.8,
+            "image": "/images/doublesize.jpg",
             "description": "Comfortable double-sized bed with premium silk cotton mattress for couples.",
             "features": [
                 'Dimensions: 75" x 54"', 
@@ -44,16 +43,17 @@ def transfer_frontend_products():
                 "dimensions": '75" x 54"',
                 "material": "Premium silk cotton",
                 "type": "Double bed",
-                "weight_capacity": "200kg",
-                "thickness": "6 inches"
+                "thickness": "6 inches",
+                "weight_capacity": "200kg"
             },
-            "stock": 25,
-            "image": "/images/doublesize.jpg"
+            "stock": 25
         },
         {
             "name": "Floral Printed Pillow Cover",
-            "category": "Pillow",
+            "category": "pillow",
             "price": 599.0,
+            "rating": 4.6,
+            "image": "/images/FloralPrintedCottonBedPillow.jpg",
             "description": "Beautiful floral printed cotton pillow cover for a touch of elegance to your bedroom.",
             "features": [
                 '100% cotton material', 
@@ -63,18 +63,19 @@ def transfer_frontend_products():
             ],
             "specifications": {
                 "material": "100% Cotton",
-                "size": "Standard",
+                "size": "Standard (18x28 inches)",
                 "care": "Machine washable",
                 "closure": "Zipper",
                 "pattern": "Floral print"
             },
-            "stock": 50,
-            "image": "/images/FloralPrintedCottonBedPillow.jpg"
+            "stock": 50
         },
         {
             "name": "Hostel Size Bed",
-            "category": "Bed",
+            "category": "bed",
             "price": 9999.0,
+            "rating": 4.7,
+            "image": "/images/hostelsize.jpg",
             "description": "Compact and comfortable bed perfect for hostel and dormitory use.",
             "features": [
                 'Space-saving design', 
@@ -86,16 +87,18 @@ def transfer_frontend_products():
                 "dimensions": '72" x 30"',
                 "material": "Cotton blend",
                 "type": "Single bed",
+                "thickness": "4 inches",
                 "weight_capacity": "100kg",
-                "thickness": "4 inches"
+                "portability": "Easy to transport"
             },
-            "stock": 35,
-            "image": "/images/hostelsize.jpg"
+            "stock": 35
         },
         {
             "name": "Kapok Cotton Fiber",
-            "category": "Raw Material",
+            "category": "raw",
             "price": 1999.0,
+            "rating": 4.9,
+            "image": "/images/KapokFiberPod.jpg",
             "description": "Pure kapok cotton fiber for custom filling of pillows and cushions.",
             "features": [
                 '100% natural', 
@@ -110,13 +113,14 @@ def transfer_frontend_products():
                 "processing": "Unprocessed",
                 "usage": "Pillow/cushion filling"
             },
-            "stock": 100,
-            "image": "/images/KapokFiberPod.jpg"
+            "stock": 100
         },
         {
             "name": "Kapok Silk Cotton Raw",
-            "category": "Raw Material",
+            "category": "raw",
             "price": 2499.0,
+            "rating": 4.9,
+            "image": "/images/KapokSilkCottonRaw.jpg",
             "description": "Raw kapok silk cotton for premium quality mattress and pillow making.",
             "features": [
                 'Premium quality', 
@@ -131,13 +135,14 @@ def transfer_frontend_products():
                 "processing": "Raw/Unprocessed",
                 "sustainability": "Eco-friendly"
             },
-            "stock": 75,
-            "image": "/images/KapokSilkCottonRaw.jpg"
+            "stock": 75
         },
         {
             "name": "King Size Bed",
-            "category": "Bed",
+            "category": "bed",
             "price": 22999.0,
+            "rating": 5.0,
+            "image": "/images/kingsize.jpg",
             "description": "Luxurious king-sized bed for ultimate comfort and space.",
             "features": [
                 'Dimensions: 78" x 72"', 
@@ -149,17 +154,18 @@ def transfer_frontend_products():
                 "dimensions": '78" x 72"',
                 "material": "Premium silk cotton",
                 "type": "King bed",
-                "weight_capacity": "250kg",
                 "thickness": "8 inches",
-                "layers": "Multi-layer comfort"
+                "weight_capacity": "250kg",
+                "features": "Temperature regulating"
             },
-            "stock": 15,
-            "image": "/images/kingsize.jpg"
+            "stock": 15
         },
         {
             "name": "Cotton Pillow",
-            "category": "Pillow",
+            "category": "pillow",
             "price": 1299.0,
+            "rating": 4.7,
+            "image": "/images/nagcottonpillows.jpg",
             "description": "Soft and comfortable cotton pillows for peaceful sleep.",
             "features": [
                 'Pure cotton fill', 
@@ -174,13 +180,14 @@ def transfer_frontend_products():
                 "cover": "Cotton fabric",
                 "filling": "Cotton fiber"
             },
-            "stock": 60,
-            "image": "/images/nagcottonpillows.jpg"
+            "stock": 60
         },
         {
             "name": "Queen Size Bed",
-            "category": "Bed",
+            "category": "bed",
             "price": 18999.0,
+            "rating": 4.8,
+            "image": "/images/queensize.jpg",
             "description": "Elegant queen-sized bed with premium comfort for couples.",
             "features": [
                 'Dimensions: 78" x 60"', 
@@ -192,17 +199,18 @@ def transfer_frontend_products():
                 "dimensions": '78" x 60"',
                 "material": "Premium cotton",
                 "type": "Queen bed",
-                "weight_capacity": "220kg",
                 "thickness": "7 inches",
+                "weight_capacity": "220kg",
                 "firmness": "Medium-firm"
             },
-            "stock": 20,
-            "image": "/images/queensize.jpg"
+            "stock": 20
         },
         {
             "name": "Single Size Bed",
-            "category": "Bed",
+            "category": "bed",
             "price": 11999.0,
+            "rating": 4.8,
+            "image": "/images/singlesize.jpg",
             "description": "Comfortable single-sized bed perfect for one person.",
             "features": [
                 'Dimensions: 75" x 36"', 
@@ -214,77 +222,56 @@ def transfer_frontend_products():
                 "dimensions": '75" x 36"',
                 "material": "Premium silk cotton",
                 "type": "Single bed",
-                "weight_capacity": "120kg",
                 "thickness": "5 inches",
+                "weight_capacity": "120kg",
                 "portability": "Lightweight"
             },
-            "stock": 30,
-            "image": "/images/singlesize.jpg"
+            "stock": 30
         }
     ]
     
-    created_products = []
-    updated_products = []
-    
     try:
+        # Clear existing products
+        existing_count = Product.objects.count()
+        if existing_count > 0:
+            choice = input(f"Found {existing_count} existing products. Clear them? (y/n): ").lower()
+            if choice == 'y':
+                Product.objects.delete()
+                print(f"Cleared {existing_count} existing products")
+        
+        created_products = []
+        
         for product_data in frontend_products:
-            # Check if product already exists
-            existing_product = Product.objects(name=product_data['name']).first()
-            
-            if existing_product:
-                # Update existing product
-                existing_product.category = product_data['category']
-                existing_product.price = product_data['price']
-                existing_product.description = product_data['description']
-                existing_product.features = product_data['features']
-                existing_product.specifications = product_data['specifications']
-                existing_product.stock = product_data['stock']
-                existing_product.image = product_data['image']
-                existing_product.updated_at = datetime.utcnow()
-                existing_product.save()
-                
-                updated_products.append(product_data['name'])
-                print(f"Updated: {product_data['name']}")
-                
-            else:
-                # Create new product
-                new_product = Product(
-                    name=product_data['name'],
-                    category=product_data['category'],
-                    price=product_data['price'],
-                    description=product_data['description'],
-                    features=product_data['features'],
-                    specifications=product_data['specifications'],
-                    stock=product_data['stock'],
-                    image=product_data['image'],
-                    is_active=True,
-                    low_stock_threshold=5
-                )
-                new_product.save()
-                
-                created_products.append(product_data['name'])
-                print(f"Created: {product_data['name']}")
+            # Create new product with exact data
+            product = Product(
+                name=product_data['name'],
+                category=product_data['category'],
+                price=product_data['price'],
+                rating=product_data['rating'],
+                image=product_data['image'],
+                description=product_data['description'],
+                features=product_data['features'],
+                specifications=product_data['specifications'],
+                stock=product_data['stock'],
+                is_active=True,
+                low_stock_threshold=5
+            )
+            product.save()
+            created_products.append(product.name)
+            print(f"Created: {product.name} - ₹{product.price:,.0f} (Stock: {product.stock})")
         
         print("\n" + "=" * 60)
-        print("Transfer completed successfully!")
+        print("Transfer Completed Successfully!")
         print(f"Products created: {len(created_products)}")
-        print(f"Products updated: {len(updated_products)}")
         print(f"Total products in database: {Product.objects.count()}")
         
-        # Display summary
-        if created_products:
-            print(f"\nNew products:")
-            for name in created_products:
-                print(f"   - {name}")
-        
-        if updated_products:
-            print(f"\nUpdated products:")
-            for name in updated_products:
-                print(f"   - {name}")
-        
-        # Show categories
+        # Show summary by category
         categories = Product.objects.distinct('category')
         print(f"\nCategories: {', '.join(categories)}")
+        
+        for category in categories:
+            count = Product.objects(category=category).count()
+            print(f"{category}: {count} products")
         
         return True
         
@@ -292,59 +279,5 @@ def transfer_frontend_products():
         print(f"Error during transfer: {e}")
         return False
 
-def display_current_products():
-    """Display current products in database"""
-    print("\nCurrent Products in Database:")
-    print("=" * 60)
-    
-    products = Product.objects.order_by('category', 'name')
-    
-    if not products:
-        print("No products found in database.")
-        return
-    
-    current_category = None
-    for product in products:
-        if current_category != product.category:
-            current_category = product.category
-            print(f"\n{current_category}:")
-        
-        print(f"   • {product.name} - ₹{product.price:,.0f} (Stock: {product.stock})")
-
-def clear_all_products():
-    """Clear all products from database (use with caution)"""
-    count = Product.objects.count()
-    if count > 0:
-        Product.objects.delete()
-        print(f"Cleared {count} products from database")
-    else:
-        print("No products to clear")
-
 if __name__ == "__main__":
-    print("Frontend to Backend Product Transfer Tool")
-    print("=" * 60)
-    
-    while True:
-        print("\nOptions:")
-        print("1. Transfer products from frontend to backend")
-        print("2. Display current products in database")
-        print("3. Clear all products (Use with caution)")
-        print("4. Exit")
-        
-        choice = input("\nEnter your choice (1-4): ").strip()
-        
-        if choice == '1':
-            transfer_frontend_products()
-        elif choice == '2':
-            display_current_products()
-        elif choice == '3':
-            confirm = input("Are you sure you want to clear all products? (yes/no): ").strip().lower()
-            if confirm == 'yes':
-                clear_all_products()
-            else:
-                print("Operation cancelled")
-        elif choice == '4':
-            print("Goodbye!")
-            break
-        else:
-            print("Invalid choice. Please try again.")
+    transfer_exact_frontend_products()

@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import * as THREE from 'three';
 import './CustomBedCreator.css';
 
+// Import a placeholder image for custom mattresses
+import kingSizeBed from '../assets/images/kingsize.jpg'; // Using existing image as placeholder
+
 // Simple 3D Loading Component (for inside Canvas)
 function Canvas3DLoader() {
   return (
@@ -169,6 +172,7 @@ function CustomBedCreator() {
   
   const [selectedDesign, setSelectedDesign] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   // Pricing calculation
   const calculatePrice = () => {
@@ -226,32 +230,73 @@ function CustomBedCreator() {
     }
   ];
 
-  const addToCart = () => {
-    const customMattress = {
-      id: `custom-mattress-${Date.now()}`,
-      name: `Custom ${designs.find(d => d.id === selectedDesign)?.name} Mattress`,
-      category: 'custom-mattress',
-      price: calculatePrice(),
-      rating: 5.0,
-      image: '/api/placeholder/400/300',
-      description: `Custom ${designs.find(d => d.id === selectedDesign)?.name.toLowerCase()} mattress with dimensions ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
-      features: [
-        `Dimensions: ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
-        ...designs.find(d => d.id === selectedDesign)?.features || [],
-        'Premium silk cotton filling',
-        'Custom handcrafted mattress'
-      ],
-      isCustom: true,
-      customSpecs: { dimensions, design: selectedDesign }
-    };
-
-    const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const updatedCart = [...existingCart, { ...customMattress, quantity: 1 }];
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  const addToCart = async () => {
+    setIsAddingToCart(true);
     
-    // Show success message
-    alert('Custom mattress added to cart successfully!');
-    navigate('/products');
+    try {
+      const customMattress = {
+        id: `custom-mattress-${Date.now()}`,
+        name: `Custom ${designs.find(d => d.id === selectedDesign)?.name} Mattress`,
+        category: 'custom-mattress',
+        price: calculatePrice(),
+        rating: 5.0,
+        image: kingSizeBed, // Use actual imported image instead of placeholder
+        description: `Custom ${designs.find(d => d.id === selectedDesign)?.name.toLowerCase()} mattress with dimensions ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
+        features: [
+          `Dimensions: ${dimensions.length}" x ${dimensions.breadth}" x ${dimensions.height}"`,
+          ...designs.find(d => d.id === selectedDesign)?.features || [],
+          'Premium silk cotton filling',
+          'Custom handcrafted mattress'
+        ],
+        isCustom: true,
+        customSpecs: { dimensions, design: selectedDesign },
+        stock: 1,
+        in_stock: true
+      };
+
+      // Get existing cart
+      const existingCartString = localStorage.getItem('cart');
+      const existingCart = existingCartString ? JSON.parse(existingCartString) : [];
+      
+      // Add new item
+      const updatedCart = [...existingCart, { ...customMattress, quantity: 1 }];
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      
+      // Trigger storage event manually for same-window updates
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'cart',
+        newValue: JSON.stringify(updatedCart),
+        oldValue: existingCartString
+      }));
+
+      // Also dispatch custom event
+      window.dispatchEvent(new CustomEvent('cartUpdated', { 
+        detail: { 
+          cart: updatedCart, 
+          newItem: customMattress 
+        } 
+      }));
+      
+      // Debug log
+      console.log('Custom mattress added to cart:', customMattress);
+      console.log('Updated cart:', updatedCart);
+      
+      // Show success message
+      alert('🎉 Custom mattress added to cart successfully!');
+      
+      // Navigate back to products page
+      setTimeout(() => {
+        navigate('/products');
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error adding custom mattress to cart:', error);
+      alert('❌ Error adding mattress to cart. Please try again.');
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   const handleCanvasCreated = () => {
@@ -429,9 +474,18 @@ function CustomBedCreator() {
               </div>
               <p className="price-note">*Includes premium materials, craftsmanship, and 10-year warranty</p>
               
-              <button className="add-to-cart-custom" onClick={addToCart}>
-                <span className="button-icon">🛒</span>
-                Add Custom Mattress to Cart
+              <button 
+                className={`add-to-cart-custom ${isAddingToCart ? 'loading' : ''}`}
+                onClick={addToCart}
+                disabled={isAddingToCart}
+              >
+                <span className="button-icon">
+                  {isAddingToCart ? '⏳' : '🛒'}
+                </span>
+                <span className="button-text">
+                  {isAddingToCart ? 'Adding to Cart...' : 'Add Custom Mattress to Cart'}
+                </span>
+                {isAddingToCart && <div className="button-loader"></div>}
               </button>
             </div>
           </div>
