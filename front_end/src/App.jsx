@@ -7,6 +7,7 @@ import Home from './pages/HomePage';
 import Products from './pages/Products';
 import PaymentPage from './pages/PaymentPage';
 import CustomBedCreator from './pages/CustomBedCreator';
+import AdminDashboard from './pages/AdminDashboard'; // Import AdminDashboard
 import './App.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/products" element={<Products />} /> 
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/custom-bed-creator" element={<CustomBedCreator />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>
       <ContactUs />
