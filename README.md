@@ -95,7 +95,8 @@ DreamBed is a modern e-commerce solution built for bed selling companies who wan
 
 *[Add your frontend images here]*
 
-![Home Page]![image](https://github.com/user-attachments/assets/df1147f9-4944-42b5-adc4-e7cfe9886dc4)
+![Home Page]![image](https://github.com/user-attachments/assets/df1147f9-4944-42b5-adc4-e7cfe9886dc4)![image](https://github.com/user-attachments/assets/595f52f0-8b68-424c-89e7-e2fca99e6a16)
+
 ![Products Catalog](./screenshots/products-page.png)
 ![Custom Bed Creator](./screenshots/custom-creator.png)
 ![Payment Interface](./screenshots/payment-page.png)
