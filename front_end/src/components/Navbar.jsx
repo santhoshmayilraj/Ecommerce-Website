@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../assets/images/logo.jpg';
+import logo from '../assets/images/new_logo.jpg';
 import './Navbar.css';
 
 function Navbar() {
@@ -39,21 +39,18 @@ function Navbar() {
     <nav className={`navbar ${isScrolled ? 'navbar-scrolled' : ''}`}>
       <div className="navbar-container">
         <div className="navbar-content">
-          {/* Enhanced Logo Section */}
+          {/* Simplified Logo Section - No fake badge */}
           <div className="logo-container">
             <Link to="/" className="logo-link">
               <div className="logo-wrapper">
                 <img 
                   src={logo} 
-                  alt="Ayyanar Logo"
+                  alt="Nagarathinam Logo"
                   className="logo-image"
                 />
-                <div className="logo-badge">
-                  <span className="logo-badge-text">Premium</span>
-                </div>
               </div>
               <div className="company-info">
-                <span className="company-name">Ayyanar</span>
+                <span className="company-name">Nagarathinam</span>
                 <span className="company-tagline">Premium Comfort</span>
               </div>
             </Link>
@@ -77,11 +74,11 @@ function Navbar() {
             </ul>
           </div>
 
-          {/* Enhanced CTA Section */}
+          {/* Compact CTA Section */}
           <div className="navbar-actions">
-            <Link to="/custom-bed-creator" className="cta-button">
-              <span className="cta-icon">✨</span>
-              <span className="cta-text">Design Now</span>
+            <Link to="/custom-bed-creator" className="cta-button-compact">
+              <span className="cta-icon-small">🎨</span>
+              <span className="cta-text-small">Design</span>
             </Link>
             
             {/* Mobile Menu Toggle */}
@@ -121,10 +118,10 @@ function Navbar() {
             <div className="mobile-nav-footer">
               <Link 
                 to="/custom-bed-creator" 
-                className="mobile-cta-button"
+                className="mobile-cta-button-compact"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <span className="mobile-cta-icon">✨</span>
+                <span className="mobile-cta-icon">🎨</span>
                 <span className="mobile-cta-text">Start Custom Design</span>
               </Link>
             </div>

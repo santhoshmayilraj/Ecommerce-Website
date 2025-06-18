@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import ContactUs from './components/ContactUs';
 import AboutUs from './pages/AboutUs';
@@ -11,9 +11,19 @@ import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 function App() {
+  const location = useLocation();
+  
+  // Define paths where navbar and contact should NOT appear
+  const hideNavbarPaths = ['/admin'];
+  const shouldHideNavbar = hideNavbarPaths.some(path => 
+    location.pathname.startsWith(path)
+  );
+
   return (
     <div className="app">
-      <Navbar />
+      {/* Conditionally render Navbar */}
+      {!shouldHideNavbar && <Navbar />}
+      
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} /> 
@@ -24,7 +34,9 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>
-      <ContactUs />
+      
+      {/* Conditionally render ContactUs */}
+      {!shouldHideNavbar && <ContactUs />}
     </div>
   );
 }
