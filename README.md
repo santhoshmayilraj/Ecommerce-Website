@@ -93,13 +93,23 @@ DreamBed is a modern e-commerce solution built for bed selling companies who wan
 
 ## 📱 Screenshots
 
-![Home Page]![image](https://github.com/user-attachments/assets/df1147f9-4944-42b5-adc4-e7cfe9886dc4)![image](https://github.com/user-attachments/assets/595f52f0-8b68-424c-89e7-e2fca99e6a16)<img width="2849" height="1588" alt="image" src="https://github.com/user-attachments/assets/8236829c-34b9-464e-b18e-cdda42f2eb84" />
+[Home Page]![image](https://github.com/user-attachments/assets/df1147f9-4944-42b5-adc4-e7cfe9886dc4)![image](https://github.com/user-attachments/assets/595f52f0-8b68-424c-89e7-e2fca99e6a16)<img width="2849" height="1588" alt="image" src="https://github.com/user-attachments/assets/8236829c-34b9-464e-b18e-cdda42f2eb84" /> <img width="2853" height="1583" alt="image" src="https://github.com/user-attachments/assets/f79d8397-dabd-477c-b179-2d2ed78fb017" />
+
+[About Us]<img width="2853" height="1583" alt="image" src="https://github.com/user-attachments/assets/4a9ea7a1-0111-4fb1-a4de-9aaa46c3ab44" /><img width="2846" height="1587" alt="image" src="https://github.com/user-attachments/assets/d226ae29-0008-4888-a6fe-1bb81a874291" /><img width="2850" height="1587" alt="image" src="https://github.com/user-attachments/assets/1de313d1-28a7-4df5-a378-4b3a59ea2144" /><img width="2864" height="1589" alt="image" src="https://github.com/user-attachments/assets/54e9f00d-6a9c-4005-aed8-fd49e71b54bf" /><img width="2848" height="1504" alt="image" src="https://github.com/user-attachments/assets/c1b3df40-fda8-4fa2-b3d1-eb6403723d8f" /><img width="2850" height="1557" alt="image" src="https://github.com/user-attachments/assets/e67af28b-7572-460e-b397-f93702872a06" />
+
+[Products Catalog]<img width="2858" height="1586" alt="image" src="https://github.com/user-attachments/assets/777ef1e7-219a-4022-8097-6052dda5fd9c" /><img width="2847" height="1586" alt="image" src="https://github.com/user-attachments/assets/d64a37c6-2ee0-4fe6-8118-d4ab9a1feccd" /><img width="2851" height="1588" alt="image" src="https://github.com/user-attachments/assets/5cf82b61-2aa9-4502-b6d6-2058afa66fe5" />
 
 
-![Products Catalog](./screenshots/products-page.png)
-![Custom Bed Creator](./screenshots/custom-creator.png)
-![Payment Interface](./screenshots/payment-page.png)
-![Admin Dashboard](./screenshots/admin-dashboard.png)
+[Custom Bed Creator]<img width="2849" height="1589" alt="image" src="https://github.com/user-attachments/assets/72dceb33-8c97-4f84-866e-e6ffbd9727dd" /><img width="2850" height="1589" alt="image" src="https://github.com/user-attachments/assets/41e4710f-e424-454d-8d43-af512f8d47a9" /><img width="2845" height="1587" alt="image" src="https://github.com/user-attachments/assets/f66c543f-8cae-4ecc-9196-3f635a15bda0" />
+
+
+[Payment Interface]<img width="2845" height="1588" alt="image" src="https://github.com/user-attachments/assets/7b3dcc30-911f-4ea0-ac1d-0616aaa43872" /><img width="2851" height="1587" alt="image" src="https://github.com/user-attachments/assets/5de2d738-ff0e-49f2-beb0-09119facc076" /><img width="2843" height="1586" alt="image" src="https://github.com/user-attachments/assets/3ab94744-2abb-408e-878f-15cc65f82fc9" />
+
+
+[Admin Dashboard]<img width="2857" height="1590" alt="image" src="https://github.com/user-attachments/assets/cd410b08-3fac-43e6-a6fb-5bb818edcb87" /><img width="2853" height="1588" alt="image" src="https://github.com/user-attachments/assets/b9237829-43ad-4169-ae4e-23cf3106484c" /><img width="2873" height="1589" alt="image" src="https://github.com/user-attachments/assets/3867c83b-63fb-4343-9d29-220f9a7de3b5" />
+
+
+
 
 ## 🚀 Future Enhancements
 
